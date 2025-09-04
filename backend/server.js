@@ -2,8 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from 'cors';
 import mongoose from "mongoose";
-import router from "./routes/index.js";
-
+import userRouter from "./routes/user.js";
 const app = express();
 
 
@@ -12,7 +11,7 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-app.use("/api/v1", router);
+app.use("/api/v1/user", userRouter);
 
 app.get("/", (req, res) => {
   res.json({
