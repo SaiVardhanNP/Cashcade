@@ -1,10 +1,11 @@
 import { User } from "../../db.js";
 
-const search=async(req,res)=>{
-    try {
+const search = async (req, res) => {
+  try {
     const filter = req.query.filter || "";
 
     const users = await User.find({
+      _id: { $ne: req.userId }, // exclude current user
       $or: [
         {
           firstName: {
@@ -33,6 +34,6 @@ const search=async(req,res)=>{
       msg: "Something went wrong!",
     });
   }
-}
+};
 
 export default search;

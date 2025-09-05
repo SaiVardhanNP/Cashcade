@@ -5,7 +5,7 @@ import transfer from "../controllers/account/transfer.js";
 
 const accountRouter = express.Router();
 
-accountRouter.get("/balance", authMiddleware,balance);
+accountRouter.get("/balance", authMiddleware, balance);
 
 accountRouter.post("/transfer", authMiddleware, transfer);
 

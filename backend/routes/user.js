@@ -4,15 +4,20 @@ import authMiddleware from "../middlewares/authMiddleware.js";
 import signin from "../controllers/user/signin.js";
 import update from "../controllers/user/update.js";
 import search from "../controllers/user/search.js";
+import info from "../controllers/user/info.js";
 
 const userRouter = express.Router();
 
-userRouter.post("/signup",signup);
+userRouter.post("/signup", signup);
 
-userRouter.post("/signin",signin );
+userRouter.post("/signin", signin);
 
-userRouter.put("/", authMiddleware,update);
 
-userRouter.get("/bulk", authMiddleware,search);
+
+userRouter.put("/", authMiddleware, update);
+
+userRouter.get("/info",authMiddleware,info);
+
+userRouter.get("/bulk", authMiddleware, search);
 
 export default userRouter;

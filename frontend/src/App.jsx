@@ -6,13 +6,14 @@ import SendMoney from './pages/SendMoney'
 import Signup from './pages/Signup'
 import Signin from './pages/Signin'
 import ErrorPage from './pages/ErrorPage'
+import AuthPage from './pages/AuthPage'
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path='/signup' element={<Signup />} />
-        <Route path='/signin' element={<Signin />} />
+        <Route path='/signin' element={<AuthPage />} />
+        <Route path='/signup' element={<AuthPage />} />
         <Route path='/' element={<LandingPage />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/send-money' element={<SendMoney />} />

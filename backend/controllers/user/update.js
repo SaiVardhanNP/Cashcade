@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { User } from "../../db.js";
+import { z } from "zod";
 
 const updatedBody = z.object({
   firstName: z.string().trim().optional(),
@@ -9,7 +10,7 @@ const updatedBody = z.object({
     .trim()
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/)
     .optional(),
-});
+}); 
 
 const update=async(req,res)=>{
     try {
