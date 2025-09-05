@@ -3,6 +3,7 @@ import express from "express";
 import cors from 'cors';
 import mongoose from "mongoose";
 import userRouter from "./routes/user.js";
+import accountRouter from "./routes/account.js";
 const app = express();
 
 
@@ -12,6 +13,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/account",accountRouter)
 
 app.get("/", (req, res) => {
   res.json({

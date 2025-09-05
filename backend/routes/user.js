@@ -1,8 +1,10 @@
 import express from "express";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import User from "../db.js";
+import {User} from '../db.js'
 import jwt from "jsonwebtoken";
+import authMiddleware from "../middlewares/authMiddleware.js";
+import { Account } from "../db.js";
 
 const userRouter = express.Router();
 
@@ -14,6 +16,16 @@ const requiredBody = z.object({
     .string()
     .trim()
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/),
+});
+
+const updatedBody = z.object({
+  firstName: z.string().trim().optional(),
+  lastName: z.string().trim().optional(),
+  password: z
+    .string()
+    .trim()
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/)
+    .optional(),
 });
 
 userRouter.post("/signup", async (req, res) => {
@@ -47,6 +59,11 @@ userRouter.post("/signup", async (req, res) => {
       password: hashedPassword,
     });
 
+    await Account.create({
+      userId:user._id,
+      balance:Math.floor(Math.random()*1000)+1
+    })
+
     res.status(201).json({
       msg: "User created successfully!",
     });
@@ -55,14 +72,6 @@ userRouter.post("/signup", async (req, res) => {
       msg: "Failed to submit data!",
     });
   }
-});
-
-userRouter.get("/info", (req, res) => {
-  console.log("HIT /api/v1/user/info");
-
-  res.json({
-    msg: "Info",
-  });
 });
 
 userRouter.post("/signin", async (req, res) => {
@@ -80,14 +89,14 @@ userRouter.post("/signin", async (req, res) => {
       return;
     }
     console.log(user);
-    const isPasswordValid=await bcrypt.compare(password,user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       res.json({
         msg: "Invalid Password!",
       });
       return;
     }
-    const token = await jwt.sign(
+    const token = jwt.sign(
       {
         userId: user._id,
       },
@@ -100,6 +109,74 @@ userRouter.post("/signin", async (req, res) => {
   } catch (e) {
     res.status(500).json({
       msg: "Failed to sign in!",
+    });
+  }
+});
+
+userRouter.put("/", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { success } = updatedBody.safeParse(req.body);
+
+    if (!success) {
+      return res.status(400).json({
+        msg: "Invalid Data!",
+      });
+    }
+    const hashedPassword=await bcrypt.hash(req.body.password,5);
+
+    await User.updateOne(
+      {
+        _id: userId,
+      },
+      {
+        firstName:req.body.firstName,
+        lastName:req.body.lastName,
+        password:hashedPassword
+      }
+    );
+
+    res.status(200).json({
+      msg: "Data updated successfully!",
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Something went wrong!",
+    });
+  }
+});
+
+userRouter.get("/bulk", authMiddleware, async (req, res) => {
+  try {
+    const filter = req.query.filter || "";
+
+    const users = await User.find({
+      $or: [
+        {
+          firstName: {
+            $regex: filter,
+            $options: "i",
+          },
+        },
+        {
+          lastName: {
+            $regex: filter,
+            $options: "i",
+          },
+        },
+      ],
+    });
+
+    res.json({
+      users: users.map((user) => ({
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      })),
+    });
+  } catch (e) {
+    res.status(500).json({
+      msg: "Something went wrong!",
     });
   }
 });
